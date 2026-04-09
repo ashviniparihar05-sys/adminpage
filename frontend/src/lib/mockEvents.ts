@@ -260,3 +260,17 @@ export const resetToDefaults = (): void => {
 
 // Legacy export
 export const MOCK_INCOMING_EVENTS: Event[] = getEvents();
+// Current logged-in user ka profile fetch karo
+export async function getCurrentUserProfile(clerkUserId: string) {
+  try {
+    const res = await fetch("http://localhost:5006/me", {
+      headers: { "x-clerk-user-id": clerkUserId },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+    // Returns: { name, username, image, isVerified, eventsHosted, rating }
+  } catch (err) {
+    console.error("getCurrentUserProfile error:", err);
+    return null;
+  }
+}
