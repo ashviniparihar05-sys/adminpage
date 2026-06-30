@@ -202,10 +202,10 @@
 // // // // // // //           <span className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1 block">
 // // // // // // //             Operational Overview
 // // // // // // //           </span>
-// // // // // // //           <h3 className="text-3xl font-extrabold text-on-surface tracking-tight">
+// // // // // // //           <h3 className="text-3xl font-extrabold text-white tracking-tight">
 // // // // // // //             Moderation Queue
 // // // // // // //           </h3>
-// // // // // // //           <p className="text-on-surface-variant text-sm mt-1">
+// // // // // // //           <p className="text-slate-400 text-sm mt-1">
 // // // // // // //             Events submitted from MyApp awaiting AI review &amp; approval.
 // // // // // // //           </p>
 // // // // // // //         </div>
@@ -244,7 +244,7 @@
 // // // // // // //       {/* ── Filters ── */}
 // // // // // // //       <div className="bg-surface-container-low p-4 rounded-2xl flex flex-wrap items-center gap-4">
 // // // // // // //         <div className="flex-1 min-w-[180px]">
-// // // // // // //           <label className="block text-[10px] font-bold text-on-surface-variant uppercase mb-1 ml-1">
+// // // // // // //           <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">
 // // // // // // //             Risk Score
 // // // // // // //           </label>
 // // // // // // //           <select className="w-full bg-surface-container-highest border-none rounded-xl text-sm focus:ring-1 ring-primary/20 p-2">
@@ -6192,6 +6192,7 @@ const ModerationQueue = () => {
 
   // ─── Actions ──────────────────────────────────────────────────────────────
   const handleEventAction = async (eventId: string, action: 'approve' | 'reject', silent = false) => {
+    if (!silent && !window.confirm(`Are you sure you want to ${action} this event?`)) return;
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     setEvents(p => p.map(e => e.id === eventId ? { ...e, status: newStatus } : e));
     if (eventDataSource === 'api') {
@@ -6203,6 +6204,7 @@ const ModerationQueue = () => {
   };
 
   const handleServiceAction = async (serviceId: string, action: 'approve' | 'reject', silent = false) => {
+    if (!silent && !window.confirm(`Are you sure you want to ${action} this service?`)) return;
     const newStatus = action === 'approve' ? 'approved' : 'rejected';
     setServices(p => p.map(s => s.id === serviceId ? { ...s, status: newStatus } : s));
     try { await fetch(`http://localhost:5006/services/${serviceId}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: newStatus }) }); }
@@ -6410,8 +6412,8 @@ const ModerationQueue = () => {
       {/* MAIN GRID */}
       <div className="grid grid-cols-12 gap-6 items-start">
         {/* Table */}
-        <div className="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm border border-indigo-50/50">
-          <div className="px-6 py-4 bg-indigo-50/30 flex justify-between items-center border-b border-indigo-50/50">
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+          <div className="px-6 py-4 bg-slate-50 flex justify-between items-center border-b border-slate-200">
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-sm font-bold text-indigo-900">
                 {filtered.length} {activeTab}{filtered.length !== currentItems.length && <span className="text-on-surface-variant font-normal"> (of {currentItems.length})</span>}
@@ -6429,7 +6431,7 @@ const ModerationQueue = () => {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="text-left border-b border-indigo-50">
+                <tr className="text-left border-b border-slate-200">
                   <th className="pl-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">{activeTab === 'events' ? 'Event & Host' : 'Service & Provider'}</th>
                   {activeTab === 'events' && (
                     <th className="px-4 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
@@ -6446,7 +6448,7 @@ const ModerationQueue = () => {
                   <th className="pr-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-indigo-50/30">
+              <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr><td colSpan={6} className="py-16 text-center"><Loader2 size={28} className="animate-spin text-primary mx-auto mb-2" /><p className="text-sm text-on-surface-variant">Fetching {activeTab}…</p></td></tr>
                 ) : activeTab === 'services' && !servicesLoaded ? (
@@ -6463,7 +6465,7 @@ const ModerationQueue = () => {
                   return (
                     <tr key={item.id}
                       onClick={() => { if (isEvent) { setSelectedEvent(item); if (!eventAnalyses[item.id]) analyzeEvent(item); } else { setSelectedService(item); if (!serviceAnalyses[item.id]) analyzeService(item); } }}
-                      className={`transition-colors cursor-pointer ${isSelected ? 'bg-primary/5 border-l-2 border-l-primary' : 'hover:bg-surface-container-low/50'}`}>
+                      className={`transition-colors cursor-pointer ${isSelected ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
                       <td className="pl-6 py-4">
                         <div className="flex items-center gap-3">
                           <img src={item.image} alt={item.title} className="w-12 h-12 rounded-xl object-cover shadow-sm flex-shrink-0" referrerPolicy="no-referrer" onError={e => { (e.target as HTMLImageElement).src = `https://placehold.co/48x48/e8eaf6/4355b9?text=${isEvent ? 'E' : 'S'}`; }} />
@@ -6517,7 +6519,7 @@ const ModerationQueue = () => {
           </div>
 
           {/* Pagination */}
-          <div className="px-6 py-4 bg-surface-container-low/30 border-t border-indigo-50/50 flex justify-between items-center">
+          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
             <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={safePage === 1} className="text-xs font-bold text-on-surface-variant flex items-center gap-1 hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"><ChevronLeft size={16} /> Previous</button>
             <div className="flex items-center gap-1.5">
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -6532,8 +6534,7 @@ const ModerationQueue = () => {
 
         {/* AI INSIGHTS */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-sm relative overflow-hidden border border-indigo-50/50">
-            <div className={`absolute top-0 left-0 w-1 h-full ${activeTab === 'events' ? 'bg-tertiary' : 'bg-secondary'}`} />
+          <div className="bg-gradient-to-b from-amber-50/80 to-white rounded-2xl p-6 shadow-md border-2 border-amber-400/80">
             <div className="flex items-center justify-between mb-4">
               <div className={`flex items-center gap-2 ${activeTab === 'events' ? 'text-tertiary' : 'text-secondary'}`}>
                 <Sparkles size={20} /><h4 className="font-bold text-sm">AI Insights</h4>
@@ -6571,14 +6572,14 @@ const ModerationQueue = () => {
                 {(selectedAnalysis.flags?.length ?? 0) > 0 && (
                   <div className="space-y-2 mb-4">
                     {selectedAnalysis.flags.map((flag, i) => (
-                      <div key={i} className={`p-3 rounded-lg flex items-start gap-2 ${flag.severity === 'high' ? 'bg-tertiary/5 border-l-2 border-tertiary' : 'bg-amber-50/50 border-l-2 border-amber-400'}`}>
+                      <div key={i} className={`p-3 rounded-xl flex items-start gap-2 border ${flag.severity === 'high' ? 'bg-red-50 border-red-400' : 'bg-amber-50 border-amber-400'}`}>
                         <AlertCircle size={14} className={flag.severity === 'high' ? 'text-tertiary mt-0.5' : 'text-amber-600 mt-0.5'} />
                         <div><p className="text-xs font-bold text-on-surface">{flag.type}</p><p className="text-[11px] text-on-surface-variant">{flag.description}</p></div>
                       </div>
                     ))}
                   </div>
                 )}
-                <div className="bg-surface-container-low p-4 rounded-2xl mb-4">
+                <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
                   <p className="text-[10px] font-bold text-primary uppercase mb-1">Recommendation</p>
                   <p className="text-xs italic text-on-surface-variant">"{selectedAnalysis.recommendation}"</p>
                 </div>
@@ -6596,7 +6597,7 @@ const ModerationQueue = () => {
 
           {/* Context Panel */}
           {selectedItem && (
-            <div className="bg-surface-container-lowest rounded-3xl p-6 shadow-sm border border-indigo-50/50">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">{activeTab === 'events' ? 'Event Context' : 'Service Context'}</h4>
               <div className="space-y-2.5">
                 {activeTab === 'events' && selectedEvent ? [
@@ -6615,12 +6616,14 @@ const ModerationQueue = () => {
                   <div key={r.label} className="flex justify-between text-sm"><span className="text-on-surface-variant text-xs">{r.label}</span><span className="font-semibold text-right max-w-[60%] truncate text-xs capitalize">{r.val}</span></div>
                 )) : null}
               </div>
-              <div className="mt-4 pt-4 border-t border-indigo-50 flex gap-2">
-                <button onClick={() => activeTab === 'events' && selectedEvent ? handleEventAction(selectedEvent.id, 'approve') : selectedService && handleServiceAction(selectedService.id, 'approve')}
-                  className="flex-1 py-2 bg-secondary text-white rounded-xl text-xs font-bold hover:opacity-90 flex items-center justify-center gap-1"><CheckCircle2 size={14} /> Approve</button>
-                <button onClick={() => activeTab === 'events' && selectedEvent ? handleEventAction(selectedEvent.id, 'reject') : selectedService && handleServiceAction(selectedService.id, 'reject')}
-                  className="flex-1 py-2 bg-tertiary/10 text-tertiary rounded-xl text-xs font-bold hover:bg-tertiary/20 flex items-center justify-center gap-1"><X size={14} /> Reject</button>
-              </div>
+              {['pending', 'flagged', 'under_review', 'waiting'].includes(activeTab === 'events' ? selectedEvent?.status || '' : selectedService?.status || '') && (
+                <div className="mt-4 pt-4 border-t border-slate-100 flex gap-2">
+                  <button onClick={() => activeTab === 'events' && selectedEvent ? handleEventAction(selectedEvent.id, 'approve') : selectedService && handleServiceAction(selectedService.id, 'approve')}
+                    className="flex-1 py-2 bg-secondary text-white rounded-xl text-xs font-bold hover:opacity-90 flex items-center justify-center gap-1"><CheckCircle2 size={14} /> Approve</button>
+                  <button onClick={() => activeTab === 'events' && selectedEvent ? handleEventAction(selectedEvent.id, 'reject') : selectedService && handleServiceAction(selectedService.id, 'reject')}
+                    className="flex-1 py-2 bg-tertiary/10 text-tertiary rounded-xl text-xs font-bold hover:bg-tertiary/20 flex items-center justify-center gap-1"><X size={14} /> Reject</button>
+                </div>
+              )}
             </div>
           )}
         </div>
