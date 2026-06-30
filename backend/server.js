@@ -2117,7 +2117,7 @@ app.post("/analyze", analyzeLimiter, async (req, res) => {
     if (!event) return res.status(400).json({ error: "No event data provided" });
     if (!force && event.id) {
       let existing = null;
-      try { existing = await db.collection("events").findOne({ _id: new ObjectId(event.id) }); } catch (_) {}
+      try { existing = await db.collection("events").findOne({ _id: new ObjectId(event.id) }); } catch (_) { }
       if (!existing) existing = await db.collection("events").findOne({ id: event.id });
       if (existing?.aiAnalysis?.riskScore !== undefined)
         return res.json({ ...existing.aiAnalysis, fromCache: true });
@@ -2140,7 +2140,7 @@ app.post("/analyze-service", analyzeLimiter, async (req, res) => {
     if (!service) return res.status(400).json({ error: "No service data provided" });
     if (!force && service.id) {
       let existing = null;
-      try { existing = await db.collection("services").findOne({ _id: new ObjectId(service.id) }); } catch (_) {}
+      try { existing = await db.collection("services").findOne({ _id: new ObjectId(service.id) }); } catch (_) { }
       if (!existing) existing = await db.collection("services").findOne({ id: service.id });
       if (existing?.aiAnalysis?.riskScore !== undefined)
         return res.json({ ...existing.aiAnalysis, fromCache: true });
@@ -2297,16 +2297,16 @@ connectDB().then(() => {
     console.log("   ✅ Rate limiting ready");
     console.log("═".repeat(70) + "\n");
     // In server.js — add these lines to the startup log (inside app.listen callback)
-// 🔧 MODIFIED: Add new endpoint docs to the startup printout
+    // 🔧 MODIFIED: Add new endpoint docs to the startup printout
 
-console.log("\n   👥 Users + Moderation:");                          // ✅ NEW label
-console.log("   GET  /users                     - List all users");
-console.log("   GET  /users/:id                 - Get single user");
-console.log("   POST /users/:clerkId/suspend    - 7-day suspension");  // ✅ NEW
-console.log("   POST /users/:clerkId/ban        - Permanent ban");     // ✅ NEW
-console.log("   POST /users/:clerkId/unsuspend  - Lift suspension");   // ✅ NEW
-console.log("   POST /users/:clerkId/unban      - Reverse ban");       // ✅ NEW
-console.log("   GET  /users/:clerkId/moderation-history - Audit log"); // ✅ NEW
+    console.log("\n   👥 Users + Moderation:");                          // ✅ NEW label
+    console.log("   GET  /users                     - List all users");
+    console.log("   GET  /users/:id                 - Get single user");
+    console.log("   POST /users/:clerkId/suspend    - 7-day suspension");  // ✅ NEW
+    console.log("   POST /users/:clerkId/ban        - Permanent ban");     // ✅ NEW
+    console.log("   POST /users/:clerkId/unsuspend  - Lift suspension");   // ✅ NEW
+    console.log("   POST /users/:clerkId/unban      - Reverse ban");       // ✅ NEW
+    console.log("   GET  /users/:clerkId/moderation-history - Audit log"); // ✅ NEW
   });
 
   startBackgroundBot();

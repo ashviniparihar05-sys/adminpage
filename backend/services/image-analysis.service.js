@@ -92,7 +92,8 @@
 // 21-40  = Generic/stock but harmless
 // 41-60  = Somewhat irrelevant or mildly concerning
 // 61-80  = Clearly wrong image or moderately concerning content
-// 81-100 = NSFW, violent, misleading, or highly suspicious`,
+// 81-100 = Highly suspicious or misleading
+// **CRITICAL**: If there is ANY nudity, sexual content, gore, drug use, or illegal acts, you MUST set "isAppropriate" to false and "imageRiskScore" exactly to 100.`,
 //             },
 //             {
 //               type: "image_url",
@@ -245,7 +246,8 @@ Scoring guide:
 21-40  = Generic/stock but harmless
 41-60  = Somewhat irrelevant or mildly concerning
 61-80  = Clearly wrong image or moderately concerning content
-81-100 = NSFW, violent, misleading, or highly suspicious`,
+81-100 = Highly suspicious or misleading
+**CRITICAL**: If there is ANY nudity, sexual content, gore, drug use, or illegal acts, you MUST set "isAppropriate" to false and "imageRiskScore" exactly to 100.`,
             },
             {
               type: "image_url",

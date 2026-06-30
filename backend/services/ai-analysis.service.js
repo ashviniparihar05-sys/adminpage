@@ -203,10 +203,17 @@ export async function runAIAnalysis(item, collectionName) {
   const textPrompt = isService
     ? `You are a strict AI moderation system for a service marketplace. Analyze this service listing and detect fraud, fake profiles, or risky content.
 
+FIELD ANALYSIS INSTRUCTIONS:
+- Title & Description: Scrutinize for hidden adult keywords, unrealistic promises, or attempts to bypass the platform (e.g., "call me direct", sharing phone numbers/links).
+- Price & Rate Type: Flag absurdly low (e.g., $1/hr) or extremely high prices which often indicate scams or fake profiles.
+- Location: Flag vague locations ("anywhere", "secret") or suspicious areas.
+- Availability/Capacity: Flag unrealistic schedules or meeting styles that hint at illicit activities.
+
 SCORING RULES:
-- HIGH RISK (70-100): Vague description, suspicious pricing, fake-sounding profile, requests for advance payment outside platform, unrealistic claims, adult/illegal service hints
-- MEDIUM RISK (40-69): minimal description, unusually high/low pricing, limited availability
-- LOW RISK (0-39): Clear description, reasonable pricing, professional tone, verifiable location, realistic schedule
+- CRITICAL RISK (100): ANY adult content, sexual hints, illegal services, nudity, or extreme violence MUST instantly get 100.
+- HIGH RISK (70-99): Vague description, suspicious pricing, fake-sounding profile, requests for advance payment outside platform, unrealistic claims.
+- MEDIUM RISK (40-69): minimal description, unusually high/low pricing, limited availability.
+- LOW RISK (0-39): Clear description, reasonable pricing, professional tone, verifiable location, realistic schedule.
 
 SERVICE LISTING:
 Title: ${item.title || "N/A"}
@@ -233,10 +240,17 @@ Return ONLY valid JSON:
 }`
     : `You are a strict AI moderation system for an event platform. Analyze this event and detect fraud, scams, or risky content.
 
+FIELD ANALYSIS INSTRUCTIONS:
+- Title & Description: Scrutinize for hidden adult keywords, illegal drug references, fake ticket selling, or attempts to bypass platform payments.
+- Price & Rate Type: Flag absurdly low prices for high-value events or extremely high prices with no details (scams).
+- Location: Flag vague, hidden, "secret", or "TBD" locations for events that should have a fixed venue.
+- Capacity/Availability: Flag unrealistic capacities (e.g., 10000 people in a small cafe) or suspicious setups.
+
 SCORING RULES:
-- HIGH RISK (70-100): Vague details, suspicious payment, hidden location, unrealistic claims, drug references
-- MEDIUM RISK (40-69): missing details, high price with few details
-- LOW RISK (0-39): Clear description, reasonable price, known venue, professional tone
+- CRITICAL RISK (100): ANY adult content, sexual hints, illegal activities, nudity, or extreme violence MUST instantly get 100.
+- HIGH RISK (70-99): Vague details, suspicious payment, hidden location, unrealistic claims, drug references.
+- MEDIUM RISK (40-69): missing details, high price with few details.
+- LOW RISK (0-39): Clear description, reasonable price, known venue, professional tone.
 
 EVENT:
 Title: ${item.title || "N/A"}
@@ -288,22 +302,30 @@ Return ONLY valid JSON:
   const textRiskScore = Math.min(100, Math.max(0, parsed.riskScore ?? 50));
   const imageRiskScore = imageAnalysis?.imageRiskScore ?? 0;
 
-  // Combined score: Text 75% + Image 25%
-  let combinedRiskScore = Math.round(textRiskScore * 0.75 + imageRiskScore * 0.25);
+  // Combined score: Dynamic weighting based on highest risk
+  let combinedRiskScore;
+  if (imageRiskScore >= 80) {
+    // If image is very risky, give it higher weight (60%)
+    combinedRiskScore = Math.round(textRiskScore * 0.40 + imageRiskScore * 0.60);
+  } else {
+    // Default weighting (Text 70% + Image 30%)
+    combinedRiskScore = Math.round(textRiskScore * 0.70 + imageRiskScore * 0.30);
+  }
 
-  // Hard overrides
+  // Hard overrides for strict moderation
   if (imageAnalysis && imageAnalysis.isAppropriate === false) {
-    combinedRiskScore = Math.max(combinedRiskScore, 75);
+    // INSTANT REJECT for nudity/sexual/crime
+    combinedRiskScore = 100;
   }
   if (imageAnalysis && imageAnalysis.isRelevant === false && textRiskScore >= 50) {
-    combinedRiskScore = Math.min(100, combinedRiskScore + 10);
+    combinedRiskScore = Math.min(100, combinedRiskScore + 20); // Penalty for irrelevant image on suspicious text
   }
   if (
     imageAnalysis?.suspiciousText &&
     imageAnalysis.suspiciousText !== "none" &&
     imageAnalysis.suspiciousText.length > 4
   ) {
-    combinedRiskScore = Math.min(100, combinedRiskScore + 15);
+    combinedRiskScore = Math.min(100, combinedRiskScore + 25);
   }
 
   combinedRiskScore = Math.min(100, Math.max(0, combinedRiskScore));
@@ -378,7 +400,9 @@ Return ONLY valid JSON:
     scoreBreakdown: {
       textRiskScore,
       imageRiskScore,
-      combinedNote: `Text: ${textRiskScore} × 75% + Image: ${imageRiskScore} × 25% = ${combinedRiskScore}`,
+      combinedNote: imageRiskScore >= 80 
+        ? `Text: ${textRiskScore} × 40% + Image: ${imageRiskScore} × 60% = ${combinedRiskScore}`
+        : `Text: ${textRiskScore} × 70% + Image: ${imageRiskScore} × 30% = ${combinedRiskScore}`,
     },
   };
 }

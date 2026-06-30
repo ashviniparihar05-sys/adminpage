@@ -425,12 +425,13 @@ router.patch("/:id/status", async (req, res) => {
       admin_status: status,
       moderationStatus: status,
       updatedAt: new Date(),
+      adminReviewedAt: new Date(),
       ...(moderatorNote ? { moderatorNote } : {}),
       ...(status === "approved"
-        ? { isApproved: true, isActive: true, isListed: true }
+        ? { isApproved: true, isActive: true, isListed: true, status: "active", approvedAt: new Date() }
         : {}),
       ...(status === "rejected"
-        ? { isApproved: false, isActive: false, isListed: false }
+        ? { isApproved: false, isActive: false, isListed: false, status: "rejected", rejectedAt: new Date() }
         : {}),
     };
 
